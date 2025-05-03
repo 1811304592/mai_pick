@@ -5,7 +5,7 @@
     left: 0;
     right: 0;
     height: 40px;
-    background-color: #f8f9fa;
+    color: #ffffff;
     padding: 0;
     text-align: center;
     font-size: 1.2em;
@@ -19,15 +19,15 @@
 }
 
 .status-bar.ban-phase { 
-    background-color: #ffebee; 
+    background-color: #ff2142; 
 }
 
 .status-bar.pick-phase { 
-    background-color: #e8f5e9; 
+    background-color: #48B8CA; 
 }
 
 .status-bar.complete-phase { 
-    background-color: #e3f2fd; 
+    background-color: #0ca341; 
 }
 
 /* 调整主体内容的上边距以匹配新的状态栏高度 */
@@ -150,8 +150,8 @@ body {
 
 .song-item.selected {
     border: 2px solid #48B8CA;
-    background: #e8f5e9;  /* 添加绿色背景 */
-    opacity: 0.8;  /* 稍微调整透明度 */
+    background: #e4fbff;  /* 添加绿色背景 */
+    opacity: 1;  /* 稍微调整透明度 */
 }
 
 .song-cover {

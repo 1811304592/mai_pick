@@ -24,7 +24,35 @@
     <div id="songList" class="song-list"></div>
 
     <script type="module">
-        import { songs } from '/js/songs.js';
+        const songs = [
+            // FESTiVAL PLUS
+            {
+                id: "festivalplus_1",
+                title: "MAXRAGE",
+                level: 14.0,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL PLUS"
+            },
+            {
+                id: "festivalplus_2",
+                title: "Astrosexy",
+                level: 13.9,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL PLUS"
+            },
+            // ... 更多 FESTiVAL PLUS 歌曲
+
+            // FESTiVAL
+            {
+                id: "festival_1",
+                title: "PANDORA PARADOXXX",
+                level: 14.1,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL"
+            },
+            // ... 更多 FESTiVAL 歌曲
+
+        ];
 
         let players = [];
         let currentPlayerIndex = 0;
@@ -65,7 +93,7 @@
 
         function updatePlayerList() {
             const playerList = document.getElementById('playerList');
-            playerList.innerHTML = '';  // 只清空内容，不添加标题
+            playerList.innerHTML = '';  
             
             const banLimit = parseInt(localStorage.getItem('banLimit')) || 2;
             const pickLimit = parseInt(localStorage.getItem('pickLimit')) || 2;
