@@ -1,0 +1,166 @@
+/* 状态栏样式 */
+.status-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background-color: #f8f9fa;
+    padding: 0;
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.status-bar.ban-phase { 
+    background-color: #ffebee; 
+}
+
+.status-bar.pick-phase { 
+    background-color: #e8f5e9; 
+}
+
+.status-bar.complete-phase { 
+    background-color: #e3f2fd; 
+}
+
+/* 调整主体内容的上边距以匹配新的状态栏高度 */
+body {
+    padding-top: 40px;
+    margin: 0;
+}
+
+/* 调整设置按钮位置以适应新的状态栏 */
+/* 调整设置按钮位置 */
+.settings-link {
+    position: fixed;
+    top: 50px;  /* 改为50px，让按钮在状态栏下方 */
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #48B8CA;
+    color: white;
+    text-decoration: none;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.settings-link:hover {
+    background-color: #48B8CA;
+    transform: translateY(-2px);
+}
+
+/* 选手列表样式 */
+.player-list {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.player {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    min-width: 220px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.player.current-player {
+    border: 2px solid #48B8CA;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.player strong {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 12px;
+    color: #1a1a1a;
+}
+
+.player div {
+    color: #666;
+    margin: 8px 0;
+}
+
+/* 难度标签样式 */
+.tabs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    padding: 0 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: #f5f5f5;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab:hover {
+    background: #e0e0e0;
+}
+
+.tab.active {
+    background: #48B8CA;
+    color: white;
+}
+
+/* 歌曲列表样式 */
+.song-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.song-item {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.song-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.song-item.banned {
+    opacity: 0.5;
+    background: #ffebee;
+}
+
+.song-item.selected {
+    border: 2px solid #48B8CA;
+    background: #e8f5e9;  /* 添加绿色背景 */
+    opacity: 0.8;  /* 稍微调整透明度 */
+}
+
+.song-cover {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.song-item div {
+    padding: 10px;
+    text-align: center;
+}

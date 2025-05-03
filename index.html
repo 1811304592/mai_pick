@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>舞萌DX比赛工具</title>
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="icon" type="image/png" href="./img/logo.png">
+</head>
+<body>
+    <div id="gameStatus" class="status-bar">
+        <p id="currentAction"></p>
+    </div>
+
+    <a href="settings.html" class="settings-link">设置</a>
+
+    <div id="playerList" class="player-list">
+    </div>
+
+    <div class="tabs" id="levelTabs">
+        <div class="tab active" data-level="all">全部歌曲</div>
+    </div>
+
+    <div id="songList" class="song-list"></div>
+
+    <script type="module">
+        import { songs } from '/js/songs.js';
+
+        let players = [];
+        let currentPlayerIndex = 0;
+        let phase = 'ban';
+        let bannedSongs = new Set();
+        let currentLevel = 'all';
+
+        function loadGameData() {
+            const savedPlayers = localStorage.getItem('players');
+            const savedBannedSongs = localStorage.getItem('bannedSongs');
+            const savedPhase = localStorage.getItem('phase');
+            const savedCurrentPlayerIndex = localStorage.getItem('currentPlayerIndex');
+
+            if (savedPlayers) {
+                players = JSON.parse(savedPlayers);
+                players.forEach(player => {
+                    player.bannedCount = player.bannedCount || 0;
+                    player.selectedCount = player.selectedCount || 0;
+                    player.selectedSongs = new Set(player.selectedSongs || []);
+                });
+            }
+            if (savedBannedSongs) bannedSongs = new Set(JSON.parse(savedBannedSongs));
+            if (savedPhase) phase = savedPhase;
+            if (savedCurrentPlayerIndex) currentPlayerIndex = parseInt(savedCurrentPlayerIndex);
+        }
+
+        function saveGameData() {
+            const playersToSave = players.map(player => ({
+                ...player,
+                selectedSongs: Array.from(player.selectedSongs || [])
+            }));
+            
+            localStorage.setItem('players', JSON.stringify(playersToSave));
+            localStorage.setItem('bannedSongs', JSON.stringify(Array.from(bannedSongs)));
+            localStorage.setItem('phase', phase);
+            localStorage.setItem('currentPlayerIndex', currentPlayerIndex);
+        }
+
+        function updatePlayerList() {
+            const playerList = document.getElementById('playerList');
+            playerList.innerHTML = '';  // 只清空内容，不添加标题
+            
+            const banLimit = parseInt(localStorage.getItem('banLimit')) || 2;
+            const pickLimit = parseInt(localStorage.getItem('pickLimit')) || 2;
+            
+            players.forEach((player, index) => {
+                const div = document.createElement('div');
+                div.className = `player ${index === currentPlayerIndex ? 'current-player' : ''}`;
+                div.innerHTML = `
+                    <strong>${player.name}</strong>
+                    <div>Ban进度: ${player.bannedCount}/${banLimit}</div>
+                    <div>选歌进度: ${phase === 'complete' ? '已完成' : `${player.selectedCount}/${pickLimit}`}</div>
+                `;
+                playerList.appendChild(div);
+            });
+        }
+
+        function updateGameStatus() {
+            const status = document.getElementById('currentAction');
+            const statusBar = document.getElementById('gameStatus');
+            
+            // 移除所有状态类
+            statusBar.classList.remove('ban-phase', 'pick-phase', 'complete-phase');
+            
+            if (players.length === 0) {
+                status.textContent = '请先在设置页面添加选手';
+                return;
+            }
+
+            if (phase === 'complete') {
+                status.textContent = '所有选手已完成选歌';
+                statusBar.classList.add('complete-phase');
+            } else {
+                const currentPlayer = players[currentPlayerIndex];
+                status.textContent = `${currentPlayer.name} - ${phase === 'ban' ? 'Ban歌阶段' : '选歌阶段'}`;
+                statusBar.classList.add(phase === 'ban' ? 'ban-phase' : 'pick-phase');
+            }
+        }
+
+        function initializeTabs() {
+            const tabs = document.getElementById('levelTabs');
+            const levels = [...new Set(songs.map(song => Math.floor(song.level)))].sort((a, b) => a - b);
+            
+            levels.forEach(level => {
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                tab.textContent = `${level}`;
+                tab.dataset.level = level;
+                tab.onclick = () => switchLevel(level);
+                tabs.appendChild(tab);
+            });
+        }
+
+        function switchLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.level == level || (tab.dataset.level === 'all' && level === 'all')) {
+                    tab.classList.add('active');
+                }
+            });
+            initializeSongList();
+        }
+
+        function initializeSongList() {
+            const songList = document.getElementById('songList');
+            songList.innerHTML = '';
+            
+            const filteredSongs = currentLevel === 'all' 
+                ? songs 
+                : songs.filter(song => Math.floor(song.level) === currentLevel);
+
+            filteredSongs.forEach(song => {
+                const div = document.createElement('div');
+                div.className = 'song-item';
+                div.onclick = () => handleSongClick(song);
+                div.innerHTML = `
+                    <img src="${song.cover}" alt="${song.title}" class="song-cover">
+                    <div>${song.title}</div>
+                    <div>Level: ${song.level}</div>
+                `;
+                songList.appendChild(div);
+            });
+            updateSongList();
+        }
+
+        function updateSongList() {
+            const songItems = document.querySelectorAll('.song-item');
+            songItems.forEach((item, index) => {
+                const songTitle = item.querySelector('img').alt;
+                item.classList.remove('banned', 'selected');
+                
+                if (bannedSongs.has(songTitle)) {
+                    item.classList.add('banned');
+                }
+                
+                for (const player of players) {
+                    if (player.selectedSongs && player.selectedSongs.has(songTitle)) {
+                        item.classList.add('selected');
+                        break;
+                    }
+                }
+            });
+        }
+
+        function handleSongClick(song) {
+            if (players.length === 0) return;
+            
+            const banLimit = parseInt(localStorage.getItem('banLimit')) || 2;
+            const pickLimit = parseInt(localStorage.getItem('pickLimit')) || 2;
+            const currentPlayer = players[currentPlayerIndex];
+
+            if (phase === 'ban') {
+                if (bannedSongs.has(song.title)) return;
+                if (currentPlayer.bannedCount >= banLimit) return;
+
+                bannedSongs.add(song.title);
+                currentPlayer.bannedCount++;
+                
+                if (currentPlayer.bannedCount >= banLimit) {
+                    currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                    if (players.every(p => p.bannedCount >= banLimit)) {
+                        phase = 'pick';
+                        currentPlayerIndex = 0;
+                    }
+                }
+            } else if (phase === 'pick') {
+                if (bannedSongs.has(song.title)) return;
+                if (currentPlayer.selectedCount >= pickLimit) return;
+
+                if (!currentPlayer.selectedSongs) {
+                    currentPlayer.selectedSongs = new Set();
+                }
+                currentPlayer.selectedSongs.add(song.title);
+                currentPlayer.selectedCount++;
+
+                if (currentPlayer.selectedCount >= pickLimit) {
+                    if (players.every(p => p.selectedCount >= pickLimit)) {
+                        currentPlayerIndex = -1;
+                        phase = 'complete';
+                    } else {
+                        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+                    }
+                }
+            }
+
+            updateGameStatus();
+            updateSongList();
+            updatePlayerList();
+            saveGameData();
+        }
+
+        document.querySelector('.tab[data-level="all"]').onclick = () => switchLevel('all');
+        
+        loadGameData();
+        initializeTabs();
+        updatePlayerList();
+        updateGameStatus();
+        initializeSongList();
+
+        window.handleSongClick = handleSongClick;
+    </script>
+</body>
+</html>
