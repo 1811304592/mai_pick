@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机选歌 - 舞萌DX比赛工具</title>
+    <link rel="stylesheet" href="css/random.css">
+    <link rel="icon" type="image/png" href="./img/logo.png">
+</head>
+<body>
+
+    <a href="index.html" class="back-link">返回比赛</a>
+    <a href="settings.html" class="settings-link">设置</a>
+
+    <div class="tabs" id="levelTabs">
+        <div class="tab active" data-level="all">全部歌曲</div>
+    </div>
+
+    <div class="wheel-container">
+        <div class="wheel" id="wheel">
+            <!-- 转盘将由JS动态生成 -->
+        </div>
+        <div class="wheel-center" id="spinButton">
+            <span>随机</span>
+        </div>
+        <div class="wheel-pointer"></div>
+    </div>
+
+    <div class="result-container" id="resultContainer">
+        <h2>随机结果</h2>
+        <div id="resultSong" class="result-song">
+            <!-- 随机结果将在这里显示 -->
+        </div>
+    </div>
+
+    <script>
+        // 歌曲数据
+        const songs = [
+            // FESTiVAL PLUS
+            {
+                id: "festivalplus_1",
+                title: "MAXRAGE",
+                level: 14.0,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL PLUS"
+            },{
+                id: "festivalplus_2",
+                title: "MAXI",
+                level: 14.0,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL PLUS"
+            },
+            {
+                id: "festivalplus_3", 
+                title: "Astrosexy",
+                level: 13.9,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL PLUS"
+            },
+            // FESTiVAL
+            {
+                id: "festival_1",
+                title: "PANDORA PARADOXXX",
+                level: 14.1,
+                cover: "https://www.diving-fish.com/covers/00000.png",
+                version: "FESTiVAL"
+            },
+        ];
+
+        let currentLevel = 'all';
+        let isSpinning = false;
+        let selectedSong = null;
+        let filteredSongs = [];
+
+        // 初始化难度标签
+        function initializeTabs() {
+            const tabs = document.getElementById('levelTabs');
+            const levels = [...new Set(songs.map(song => Math.floor(song.level)))].sort((a, b) => a - b);
+            
+            levels.forEach(level => {
+                const tab = document.createElement('div');
+                tab.className = 'tab';
+                tab.textContent = `${level}`;
+                tab.dataset.level = level;
+                tab.onclick = () => switchLevel(level);
+                tabs.appendChild(tab);
+            });
+        }
+
+        // 切换难度
+        function switchLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.level == level || (tab.dataset.level === 'all' && level === 'all')) {
+                    tab.classList.add('active');
+                }
+            });
+            initializeWheel();
+        }
+
+        // 创建扇区元素
+        function createSector(index, total, song) {
+            const sector = document.createElement('div');
+            sector.className = 'wheel-sector';
+            
+            // 计算扇区角度
+            const angle = 360 / total;
+            const startAngle = index * angle;
+            const endAngle = (index + 1) * angle;
+            
+            // 创建SVG扇区
+            sector.innerHTML = `
+                <svg width="100%" height="100%" viewBox="0 0 500 500">
+                    <path d="M 250 250 L ${250 + 250 * Math.cos(startAngle * Math.PI / 180)} ${250 - 250 * Math.sin(startAngle * Math.PI / 180)} A 250 250 0 0 0 ${250 + 250 * Math.cos(endAngle * Math.PI / 180)} ${250 - 250 * Math.sin(endAngle * Math.PI / 180)} Z" 
+                          fill="${index % 2 === 0 ? '#48B8CA' : '#ff2142'}" />
+                    <text x="${250 + 180 * Math.cos((startAngle + angle/2) * Math.PI / 180)}" 
+                          y="${250 - 180 * Math.sin((startAngle + angle/2) * Math.PI / 180)}" 
+                          fill="white" 
+                          font-size="14" 
+                          font-weight="bold"
+                          text-anchor="middle"
+                          transform="rotate(${90 - (startAngle + angle/2)}, ${250 + 180 * Math.cos((startAngle + angle/2) * Math.PI / 180)}, ${250 - 180 * Math.sin((startAngle + angle/2) * Math.PI / 180)})">${song.title}</text>
+                </svg>
+            `;
+            
+            return sector;
+        }
+
+        // 初始化转盘 - 使用SVG实现
+        function initializeWheel() {
+            const wheel = document.getElementById('wheel');
+            wheel.innerHTML = '';
+            wheel.style.transform = 'rotate(0deg)';
+            
+            // 根据当前选择的难度过滤歌曲
+            filteredSongs = currentLevel === 'all' 
+                ? songs 
+                : songs.filter(song => Math.floor(song.level) === currentLevel);
+            
+            // 如果没有歌曲，显示提示
+            if (filteredSongs.length === 0) {
+                wheel.innerHTML = '<div class="wheel-empty">没有找到歌曲</div>';
+                return;
+            }
+            
+            // 创建转盘扇区
+            filteredSongs.forEach((song, index) => {
+                const sector = createSector(index, filteredSongs.length, song);
+                wheel.appendChild(sector);
+            });
+        }
+
+        // 随机选择歌曲 - 使用固定角度
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            if (filteredSongs.length === 0) return;
+            
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.style.display = 'none';
+            
+            // 完全重写随机选择逻辑
+            let selectedIndex;
+            
+            // 如果只有一首歌曲，直接选择它
+            if (filteredSongs.length === 1) {
+                selectedIndex = 0;
+            } 
+            // 如果有多首歌曲，确保不会连续选择同一首
+            else {
+                // 记录上一次选择的索引
+                const lastIndex = selectedSong ? filteredSongs.findIndex(song => song.title === selectedSong.title) : -1;
+                
+                // 生成一个不同于上次的随机索引
+                do {
+                    selectedIndex = Math.floor(Math.random() * filteredSongs.length);
+                } while (selectedIndex === lastIndex && filteredSongs.length > 1);
+            }
+            
+            selectedSong = filteredSongs[selectedIndex];
+            console.log("选中的歌曲:", selectedSong.title, "索引:", selectedIndex);
+            
+            // 计算旋转角度
+            const sectorAngle = 360 / filteredSongs.length;
+            const rotations = 3; // 旋转3圈
+            
+            // 获取当前旋转角度
+            const currentRotation = getCurrentRotation(wheel);
+            
+          
+            const targetAngle = (360 - selectedIndex * sectorAngle - sectorAngle/2 + leftOffset) % 360;
+            
+            // 确保总是顺时针旋转（增加角度）
+            const totalRotation = currentRotation + rotations * 360 + targetAngle;
+            
+            wheel.style.transition = 'transform 2s cubic-bezier(0.17, 0.67, 0.83, 0.67)';
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            
+            setTimeout(() => {
+                isSpinning = false;
+                displayResult(selectedSong);
+                // 重置transition属性，以便下次能够再次旋转
+                wheel.style.transition = '';
+                
+                // 将按钮文本更改为"重置"
+                const spinButton = document.getElementById('spinButton');
+                spinButton.innerHTML = '<span>重置</span>';
+                // 更改按钮点击事件为重置功能
+                spinButton.removeEventListener('click', spinWheel);
+                spinButton.addEventListener('click', resetWheel);
+            }, 2000);
+        }
+        
+        // 重置转盘
+        function resetWheel() {
+            const wheel = document.getElementById('wheel');
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // 隐藏结果
+            resultContainer.style.display = 'none';
+            
+            // 重置转盘位置
+            wheel.style.transition = 'transform 0.5s ease';
+            wheel.style.transform = 'rotate(0deg)';
+            
+            // 将按钮文本更改回"随机"
+            const spinButton = document.getElementById('spinButton');
+            spinButton.innerHTML = '<span>随机</span>';
+            
+            // 更改按钮点击事件回随机功能
+            spinButton.removeEventListener('click', resetWheel);
+            spinButton.addEventListener('click', spinWheel);
+            
+            // 重置选中的歌曲
+            selectedSong = null;
+        }
+
+        // 获取元素当前的旋转角度
+        function getCurrentRotation(element) {
+            // 获取元素的transform样式
+            const style = window.getComputedStyle(element);
+            const transform = style.getPropertyValue('transform');
+            
+            // 如果没有transform或者是none，返回0
+            if (!transform || transform === 'none') {
+                return 0;
+            }
+            
+            // 从matrix中提取旋转角度
+            // transform matrix格式: matrix(a, b, c, d, tx, ty)
+            // 旋转角度可以通过 Math.atan2(b, a) 计算
+            const values = transform.split('(')[1].split(')')[0].split(',');
+            const a = parseFloat(values[0]);
+            const b = parseFloat(values[1]);
+            
+            let angle = Math.round(Math.atan2(b, a) * (180/Math.PI));
+            
+            // 确保角度是正数
+            if (angle < 0) {
+                angle += 360;
+            }
+            
+            return angle;
+        }
+
+        // 显示结果
+        function displayResult(song) {
+            const resultContainer = document.getElementById('resultContainer');
+            const resultSong = document.getElementById('resultSong');
+            
+            resultSong.innerHTML = `
+                <img src="${song.cover}" alt="${song.title}" class="result-cover" onerror="this.src='./img/default-cover.png'">
+                <div class="result-info">
+                    <h3>${song.title}</h3>
+                    <p>Level: ${song.level}</p>
+                </div>
+            `;
+            
+            resultContainer.style.display = 'block';
+        }
+
+        // 初始化页面
+        document.getElementById('spinButton').addEventListener('click', spinWheel);
+        document.querySelector('.tab[data-level="all"]').onclick = () => switchLevel('all');
+        
+        initializeTabs();
+        initializeWheel();
+    </script>
+</body>
+</html>
