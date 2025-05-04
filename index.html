@@ -13,6 +13,7 @@
     </div>
 
     <a href="settings.html" class="settings-link">设置</a>
+    <button id="undoButton" class="undo-button">撤销上一步</button>
 
     <div id="playerList" class="player-list">
     </div>
@@ -59,6 +60,7 @@
         let phase = 'ban';
         let bannedSongs = new Set();
         let currentLevel = 'all';
+        let actionHistory = []; // 添加历史记录数组
 
         function loadGameData() {
             const savedPlayers = localStorage.getItem('players');
@@ -72,23 +74,33 @@
                     player.bannedCount = player.bannedCount || 0;
                     player.selectedCount = player.selectedCount || 0;
                     player.selectedSongs = new Set(player.selectedSongs || []);
+                    player.bannedSongs = player.bannedSongs ? new Set(player.bannedSongs) : new Set();
                 });
             }
             if (savedBannedSongs) bannedSongs = new Set(JSON.parse(savedBannedSongs));
             if (savedPhase) phase = savedPhase;
             if (savedCurrentPlayerIndex) currentPlayerIndex = parseInt(savedCurrentPlayerIndex);
+            
+            // 加载历史记录
+            const savedHistory = localStorage.getItem('actionHistory');
+            if (savedHistory) actionHistory = JSON.parse(savedHistory);
+            
+            // 更新撤销按钮状态
+            updateUndoButtonState();
         }
 
         function saveGameData() {
             const playersToSave = players.map(player => ({
                 ...player,
-                selectedSongs: Array.from(player.selectedSongs || [])
+                selectedSongs: Array.from(player.selectedSongs || []),
+                bannedSongs: player.bannedSongs ? Array.from(player.bannedSongs) : []
             }));
             
             localStorage.setItem('players', JSON.stringify(playersToSave));
             localStorage.setItem('bannedSongs', JSON.stringify(Array.from(bannedSongs)));
             localStorage.setItem('phase', phase);
             localStorage.setItem('currentPlayerIndex', currentPlayerIndex);
+            localStorage.setItem('actionHistory', JSON.stringify(actionHistory));
         }
 
         function updatePlayerList() {
@@ -185,13 +197,39 @@
                 const songTitle = item.querySelector('img').alt;
                 item.classList.remove('banned', 'selected');
                 
-                if (bannedSongs.has(songTitle)) {
-                    item.classList.add('banned');
+                // 移除之前可能存在的选手名称标签
+                const existingPlayerTag = item.querySelector('.player-tag');
+                if (existingPlayerTag) {
+                    existingPlayerTag.remove();
                 }
                 
+                // 检查歌曲是否被Ban
+                if (bannedSongs.has(songTitle)) {
+                    item.classList.add('banned');
+                    
+                    // 查找Ban了这首歌的选手
+                    for (const player of players) {
+                        if (player.bannedSongs && player.bannedSongs.has(songTitle)) {
+                            // 创建显示Ban选手名称的标签
+                            const playerTag = document.createElement('div');
+                            playerTag.className = 'player-tag ban-tag';
+                            playerTag.textContent = `Ban: ${player.name}`;
+                            item.appendChild(playerTag);
+                            break;
+                        }
+                    }
+                }
+                
+                // 查找选择了这首歌的选手
                 for (const player of players) {
                     if (player.selectedSongs && player.selectedSongs.has(songTitle)) {
                         item.classList.add('selected');
+                        
+                        // 创建显示选手名称的标签
+                        const playerTag = document.createElement('div');
+                        playerTag.className = 'player-tag pick-tag';
+                        playerTag.textContent = `选择: ${player.name}`;
+                        item.appendChild(playerTag);
                         break;
                     }
                 }
@@ -204,13 +242,36 @@
             const banLimit = parseInt(localStorage.getItem('banLimit')) || 2;
             const pickLimit = parseInt(localStorage.getItem('pickLimit')) || 2;
             const currentPlayer = players[currentPlayerIndex];
-
+            
+            // 保存当前状态到历史记录
+            const currentState = {
+                players: players.map(player => ({
+                    ...player,
+                    selectedSongs: Array.from(player.selectedSongs || []),
+                    bannedSongs: player.bannedSongs ? Array.from(player.bannedSongs) : []
+                })),
+                currentPlayerIndex,
+                phase,
+                bannedSongs: Array.from(bannedSongs)
+            };
+            
             if (phase === 'ban') {
                 if (bannedSongs.has(song.title)) return;
                 if (currentPlayer.bannedCount >= banLimit) return;
-
+    
                 bannedSongs.add(song.title);
+                
+                // 初始化当前选手的bannedSongs集合（如果不存在）
+                if (!currentPlayer.bannedSongs) {
+                    currentPlayer.bannedSongs = new Set();
+                }
+                
+                // 记录当前选手Ban了哪首歌
+                currentPlayer.bannedSongs.add(song.title);
                 currentPlayer.bannedCount++;
+                
+                // 添加到历史记录
+                actionHistory.push(currentState);
                 
                 if (currentPlayer.bannedCount >= banLimit) {
                     currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
@@ -228,6 +289,9 @@
                 }
                 currentPlayer.selectedSongs.add(song.title);
                 currentPlayer.selectedCount++;
+                
+                // 添加到历史记录
+                actionHistory.push(currentState);
 
                 if (currentPlayer.selectedCount >= pickLimit) {
                     if (players.every(p => p.selectedCount >= pickLimit)) {
@@ -242,15 +306,53 @@
             updateGameStatus();
             updateSongList();
             updatePlayerList();
+            updateUndoButtonState();
             saveGameData();
         }
+        
+        // 撤销功能
+        function undoLastAction() {
+            if (actionHistory.length === 0) return;
+            
+            // 获取上一个状态
+            const previousState = actionHistory.pop();
+            
+            // 恢复上一个状态
+            currentPlayerIndex = previousState.currentPlayerIndex;
+            phase = previousState.phase;
+            bannedSongs = new Set(previousState.bannedSongs);
+            
+            // 恢复选手状态
+            players = previousState.players.map(player => ({
+                ...player,
+                selectedSongs: new Set(player.selectedSongs || []),
+                bannedSongs: player.bannedSongs ? new Set(player.bannedSongs) : undefined
+            }));
+            
+            // 更新界面
+            updateGameStatus();
+            updateSongList();
+            updatePlayerList();
+            updateUndoButtonState();
+            saveGameData();
+        }
+        
+        // 更新撤销按钮状态
+        function updateUndoButtonState() {
+            const undoButton = document.getElementById('undoButton');
+            undoButton.disabled = actionHistory.length === 0;
+        }
 
+        // 初始化撤销按钮
+        document.getElementById('undoButton').addEventListener('click', undoLastAction);
+        
         document.querySelector('.tab[data-level="all"]').onclick = () => switchLevel('all');
         
         loadGameData();
         initializeTabs();
         updatePlayerList();
         updateGameStatus();
+        updateUndoButtonState();
         initializeSongList();
 
         window.handleSongClick = handleSongClick;

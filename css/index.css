@@ -56,6 +56,33 @@ body {
     transform: translateY(-2px);
 }
 
+/* 撤销按钮样式 */
+.undo-button {
+    position: fixed;
+    top: 50px;
+    left: 20px;
+    padding: 10px 20px;
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    text-decoration: none;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.undo-button:hover {
+    background-color: #f57c00;
+    transform: translateY(-2px);
+}
+
+.undo-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* 选手列表样式 */
 .player-list {
     display: flex;
@@ -163,4 +190,21 @@ body {
 .song-item div {
     padding: 10px;
     text-align: center;
+}
+
+.player-tag {
+    padding: 5px 10px;
+    border-radius: 10px;
+    margin-top: 5px;
+    font-size: 0.9em;
+    text-align: center;
+    color: white;
+}
+
+.ban-tag {
+    background-color: #ff2142;
+}
+
+.pick-tag {
+    background-color: #48B8CA;
 }
