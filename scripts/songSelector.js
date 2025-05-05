@@ -19,8 +19,44 @@ window.SongSelector = {
         // 添加难度选择下拉菜单
         this.addLevelSelector();
 
+        // 添加操作按钮
+        this.addActionButtons();
+
         // 显示歌曲列表
         this.filterSongs('');
+
+        // 渲染已选歌曲
+        this.renderSelectedSongs();
+    },
+
+    // 添加操作按钮（提交选歌按钮）
+    addActionButtons() {
+        const container = document.querySelector('.container');
+        if (!container) return;
+
+        // 检查是否已存在按钮
+        if (document.getElementById('submitSelectionBtn')) return;
+
+        const actionButtons = document.createElement('div');
+        actionButtons.className = 'action-buttons';
+
+        const submitButton = document.createElement('button');
+        submitButton.id = 'submitSelectionBtn';
+        submitButton.className = 'action-button submit-button';
+        submitButton.textContent = '提交选歌';
+
+        // 直接使用对象方法绑定，避免this指向问题
+        submitButton.addEventListener('click', () => SongSelector.showSelectedSongsConfirmation());
+
+        actionButtons.appendChild(submitButton);
+
+        // 添加到合适位置
+        const songList = document.getElementById('songList');
+        if (songList && songList.parentNode) {
+            songList.parentNode.insertBefore(actionButtons, songList.nextSibling);
+        } else {
+            container.appendChild(actionButtons);
+        }
     },
 
     // 添加搜索栏
@@ -501,7 +537,126 @@ window.SongSelector = {
             // 更新本地存储
             localStorage.setItem('selectedSongs', JSON.stringify(this.selectedSongs));
         }
+    },
+
+    // 在 SongSelector 对象中添加以下方法
+
+// 显示选歌确认页面
+    showSelectedSongsConfirmation() {
+        console.log('显示选歌确认页面');
+        if (this.selectedSongs.length === 0) {
+            alert('请至少选择一首歌曲');
+            return;
+        }
+
+        // 保存当前页面状态便于返回
+        this.savedScrollPosition = window.scrollY;
+
+        // 隐藏所有主选歌界面元素
+        const mainElements = [
+            document.getElementById('levelTabs'),
+            document.querySelector('.search-container'),
+            document.getElementById('songList'),
+            document.getElementById('pagination')
+        ];
+
+        mainElements.forEach(el => {
+            if (el) el.style.display = 'none';
+        });
+
+        // 获取或创建确认容器
+        let confirmContainer = document.getElementById('confirmContainer');
+        if (!confirmContainer) {
+            confirmContainer = document.createElement('div');
+            confirmContainer.id = 'confirmContainer';
+            confirmContainer.className = 'confirm-container';
+
+            // 插入到选定歌曲展示区域之后
+            const selectedContainer = document.getElementById('selectedSongsContainer');
+            if (selectedContainer && selectedContainer.parentNode) {
+                selectedContainer.parentNode.insertBefore(confirmContainer, selectedContainer.nextSibling);
+            } else {
+                document.querySelector('.container').appendChild(confirmContainer);
+            }
+        }
+
+        // 清空并添加确认按钮
+        confirmContainer.innerHTML = `
+        <div class="confirm-actions">
+            <h2>确认您的选择</h2>
+            <p>您已选择了 <strong>${this.selectedSongs.length}</strong> 首歌曲。请确认您的选择是否正确。</p>
+            <div class="confirm-buttons">
+                <button id="confirmSelection" class="action-button confirm-button">确认选歌</button>
+                <button id="returnToSelection" class="action-button return-button">返回修改</button>
+            </div>
+        </div>
+    `;
+
+        // 显示确认区域
+        confirmContainer.style.display = 'block';
+
+        // 修改已选择歌曲区域的标题和提示
+        const selectedTitle = document.querySelector('.selected-title');
+        if (selectedTitle) {
+            selectedTitle.innerHTML = `已选择 <span>${this.selectedSongs.length}</span> 首歌曲 <small>(点击可移除)</small>`;
+        }
+
+        // 添加按钮事件监听器
+        document.getElementById('confirmSelection').addEventListener('click', () => this.saveConfirmedSelection());
+        document.getElementById('returnToSelection').addEventListener('click', () => this.returnToSelection());
+
+        // 滚动到页面顶部
+        window.scrollTo(0, 0);
+    },
+
+// 保存确认的选歌
+    saveConfirmedSelection() {
+        if (this.selectedSongs.length === 0) {
+            alert('请至少选择一首歌曲');
+            return;
+        }
+
+        localStorage.setItem('selectedSongs', JSON.stringify(this.selectedSongs));
+        alert(`已保存 ${this.selectedSongs.length} 首歌曲，现在可以进行抽选了！`);
+
+        // 启用随机选歌按钮
+        const randomButton = document.getElementById('randomButton');
+        if (randomButton) {
+            randomButton.disabled = false;
+        }
+
+        // 返回到主页或其他操作
+        window.location.href = 'index.html';
+    },
+
+// 返回到选歌界面
+    returnToSelection() {
+        console.log('返回到选歌界面');
+
+        // 显示所有主选歌界面元素
+        const mainElements = [
+            document.getElementById('levelTabs'),
+            document.querySelector('.search-container'),
+            document.getElementById('songList'),
+            document.getElementById('pagination')
+        ];
+
+        mainElements.forEach(el => {
+            if (el) el.style.display = '';
+        });
+
+        // 隐藏确认区域
+        const confirmContainer = document.getElementById('confirmContainer');
+        if (confirmContainer) {
+            confirmContainer.style.display = 'none';
+        }
+
+        // 恢复到之前的滚动位置
+        if (this.savedScrollPosition) {
+            window.scrollTo(0, this.savedScrollPosition);
+        }
     }
+
 };
 
 console.log('SongSelector已加载');

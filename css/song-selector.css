@@ -316,3 +316,69 @@
         font-size: 12px;
     }
 }
+
+
+/* 确认页面的样式 */
+.confirm-container {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.confirm-actions h2 {
+    color: #333;
+    margin-top: 0;
+    font-weight: 500;
+}
+
+.confirm-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.confirm-button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px 25px;
+}
+
+.confirm-button:hover {
+    background-color: #388e3c;
+}
+
+.return-button {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 25px;
+}
+
+.return-button:hover {
+    background-color: #d32f2f;
+}
+
+.submit-button {
+    background-color: #ff4c89;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(255, 76, 137, 0.3);
+    transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: #e6447c;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 76, 137, 0.4);
+}
+
+/* 让按钮容器更醒目 */
+.action-buttons {
+    margin: 25px 0;
+    text-align: center;
+}
