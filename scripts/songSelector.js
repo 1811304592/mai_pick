@@ -343,6 +343,9 @@ window.SongSelector = {
         if (countElement) {
             countElement.textContent = this.selectedSongs.length;
         }
+
+        // 更新已选择歌曲列表
+        this.renderSelectedSongs();
     },
 
     // 保存选中的歌曲到本地存储
@@ -398,6 +401,106 @@ window.SongSelector = {
         // 重新过滤显示歌曲
         const searchInput = document.getElementById('songSearch');
         this.filterSongs(searchInput ? searchInput.value : '');
+    },
+
+    // 添加一个方法来渲染已选择的歌曲列表
+    renderSelectedSongs() {
+        console.log('渲染已选择歌曲列表...');
+
+        // 获取或创建容器
+        let selectedContainer = document.getElementById('selectedSongsContainer');
+        if (!selectedContainer) {
+            selectedContainer = document.createElement('div');
+            selectedContainer.id = 'selectedSongsContainer';
+            selectedContainer.className = 'selected-songs-container';
+
+            // 找到合适的位置插入容器
+            const levelSelector = document.querySelector('.level-selector-wrapper');
+            if (levelSelector) {
+                levelSelector.parentNode.insertBefore(selectedContainer, levelSelector.nextSibling);
+            } else {
+                const songList = document.getElementById('songList');
+                if (songList) {
+                    songList.parentNode.insertBefore(selectedContainer, songList);
+                }
+            }
+        }
+
+        // 清空容器
+        selectedContainer.innerHTML = '';
+
+        // 如果没有选择歌曲，显示提示信息
+        if (this.selectedSongs.length === 0) {
+            selectedContainer.innerHTML = '<div class="selected-empty">尚未选择任何歌曲</div>';
+            return;
+        }
+
+        // 创建标题
+        const title = document.createElement('h3');
+        title.className = 'selected-title';
+        title.innerHTML = `已选择 <span>${this.selectedSongs.length}</span> 首歌曲 <small>(点击可移除)</small>`;
+        selectedContainer.appendChild(title);
+
+        // 创建歌曲网格
+        const grid = document.createElement('div');
+        grid.className = 'selected-songs-grid';
+        selectedContainer.appendChild(grid);
+
+        // 添加每首歌曲
+        this.selectedSongs.forEach(song => {
+            const songCard = document.createElement('div');
+            songCard.className = 'selected-song-card';
+            songCard.dataset.id = song.id;
+
+            // 处理歌曲ID格式问题 - 按照之前的逻辑处理封面ID
+            let coverId = song.id;
+            if (/^\d{1}$/.test(coverId)) {
+                coverId = "0000" + coverId;
+            } else if (/^\d{2}$/.test(coverId)) {
+                coverId = "000" + coverId;
+            } else if (/^\d{3}$/.test(coverId)) {
+                coverId = "00" + coverId;
+            }
+
+            const coverUrl = `https://www.diving-fish.com/covers/${coverId}.png`;
+            const defaultSvg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' font-family='Arial' font-size='12' text-anchor='middle' dominant-baseline='middle' fill='%23999'%3E无封面%3C/text%3E%3C/svg%3E`;
+
+            songCard.innerHTML = `
+            <img src="${coverUrl}" class="selected-song-cover" onerror="this.src='${defaultSvg}'">
+            <div class="selected-song-title">${song.title || '未知歌曲'}</div>
+        `;
+
+            // 添加点击事件来移除歌曲
+            songCard.addEventListener('click', () => this.removeSelectedSong(song));
+
+            grid.appendChild(songCard);
+        });
+    },
+
+    // 从已选择列表中移除歌曲
+    removeSelectedSong(song) {
+        const index = this.selectedSongs.findIndex(s => s.id === song.id);
+        if (index !== -1) {
+            this.selectedSongs.splice(index, 1);
+
+            // 更新UI
+            this.renderSelectedSongs();
+
+            // 更新主列表中对应歌曲的选中状态
+            const songItem = document.querySelector(`.song-item[data-id="${song.id}"]`);
+            if (songItem) {
+                songItem.classList.remove('selected');
+            }
+
+            // 更新选中数量显示
+            const countElement = document.getElementById('selectedCount');
+            if (countElement) {
+                countElement.textContent = this.selectedSongs.length;
+            }
+
+            // 更新本地存储
+            localStorage.setItem('selectedSongs', JSON.stringify(this.selectedSongs));
+        }
     }
 };
 
