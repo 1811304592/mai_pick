@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="css/settings.css">
     <link rel="icon" type="image/png" href="img\logo.png">
 </head>
+
+<script src="scripts/settings.js"></script>
+<script src="scripts/playerManager.js"></script>
+<script src="scripts/init.js"></script>
+
 <body>
     <div class="container">
         <div class="header">
@@ -44,81 +49,5 @@
         </div>
     </div>
 
-    <script>
-        function loadSettings() {
-            const banLimit = localStorage.getItem('banLimit') || 2;
-            const pickLimit = localStorage.getItem('pickLimit') || 2;
-            document.getElementById('banLimit').value = banLimit;
-            document.getElementById('pickLimit').value = pickLimit;
-            
-            const players = JSON.parse(localStorage.getItem('players') || '[]');
-            updatePlayerList(players);
-        }
-
-        function saveSettings() {
-            const banLimit = document.getElementById('banLimit').value;
-            const pickLimit = document.getElementById('pickLimit').value;
-            localStorage.setItem('banLimit', banLimit);
-            localStorage.setItem('pickLimit', pickLimit);
-        }
-
-        function addPlayer() {
-            const name = document.getElementById('playerName').value.trim();
-            if (!name) return;
-
-            const players = JSON.parse(localStorage.getItem('players') || '[]');
-            players.push({
-                name: name,
-                bannedCount: 0,
-                selectedCount: 0,
-                selectedSongs: []
-            });
-            localStorage.setItem('players', JSON.stringify(players));
-            
-            document.getElementById('playerName').value = '';
-            updatePlayerList(players);
-        }
-
-        function removePlayer(index) {
-            const players = JSON.parse(localStorage.getItem('players') || '[]');
-            players.splice(index, 1);
-            localStorage.setItem('players', JSON.stringify(players));
-            updatePlayerList(players);
-        }
-
-        function updatePlayerList(players) {
-            const playerList = document.getElementById('playerList');
-            playerList.innerHTML = '<h2>当前选手</h2>';
-            if (players.length === 0) {
-                const emptyMessage = document.createElement('div');
-                emptyMessage.className = 'player-item';
-                emptyMessage.innerHTML = '<span>暂无选手</span>';
-                playerList.appendChild(emptyMessage);
-                return;
-            }
-            
-            players.forEach((player, index) => {
-                const div = document.createElement('div');
-                div.className = 'player-item';
-                div.innerHTML = `
-                    <span>${index + 1}. ${player.name}</span>
-                    <button onclick="removePlayer(${index})">删除</button>
-                `;
-                playerList.appendChild(div);
-            });
-        }
-
-        function resetGame() {
-            if (confirm('确定要重置比赛吗？这将清除所有选手和进度。')) {
-                localStorage.clear();
-                loadSettings();
-            }
-        }
-
-        document.getElementById('banLimit').addEventListener('change', saveSettings);
-        document.getElementById('pickLimit').addEventListener('change', saveSettings);
-
-        loadSettings();
-    </script>
 </body>
 </html>
