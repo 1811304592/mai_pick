@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./img/logo.png" width="150px">
+<img src="./img/logo.png" width="150px" title="舞萌赛事歌曲选择器图标" alt="显示了一个迪拉熊和抽选器轮廓组成的图标，是舞萌赛事歌曲选择器的图标">
 
 # Mai_Pick 舞萌赛事歌曲选择器
 
@@ -23,4 +23,4 @@
 歌曲数据正在逐步完善中
 
 ## 联系方式
-QQ1811304592
+QQ 1811304592 / 1219439938

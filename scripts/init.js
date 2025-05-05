@@ -17,36 +17,70 @@ function checkScriptsLoaded() {
     return true;
 }
 
+function initializeRandomPage() {
+    // 在这里添加转盘页面特定的初始化代码
+    console.log('转盘页面初始化中...');
+
+    // 获取已选择的歌曲
+    const selectedSongs = localStorage.getItem('selectedSongs');
+    if (!selectedSongs) {
+        document.body.innerHTML = '<div class="error">未找到已选择的歌曲，请返回首页选择歌曲</div>';
+        return;
+    }
+
+    const songs = JSON.parse(selectedSongs);
+    if (songs.length === 0) {
+        document.body.innerHTML = '<div class="error">未选择任何歌曲，请返回首页选择歌曲</div>';
+        return;
+    }
+
+    console.log(`已加载 ${songs.length} 首已选择的歌曲`);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('初始化页面...');
 
-        // 显示加载提示
-        const songListContainer = document.getElementById('songList');
-        songListContainer.innerHTML = '<div class="loading">正在加载歌曲数据...</div>';
+        // 检查当前页面类型
+        const isRandomPage = window.location.href.includes('random.html');
 
-        // 检查SongManager是否已加载
-        if (typeof SongManager === 'undefined') {
-            throw new Error('SongManager未定义！请确保scripts/songManager.js正确加载');
+        // 不同页面不同初始化
+        if (isRandomPage) {
+            // 转盘页面初始化
+            console.log('初始化转盘页面...');
+            // 此处添加转盘页面特定的初始化代码
+            initializeRandomPage();
+        } else {
+            // 选歌页面初始化
+            console.log('初始化选歌页面...');
+
+            // 显示加载提示
+            const songListContainer = document.getElementById('songList');
+            if (!songListContainer) {
+                console.error('找不到songList元素');
+                return;
+            }
+
+            songListContainer.innerHTML = '<div class="loading">正在加载歌曲数据...</div>';
+
+            // 检查SongManager是否已加载
+            if (typeof SongManager === 'undefined') {
+                throw new Error('SongManager未定义！请确保scripts/songManager.js正确加载');
+            }
+
+            // 加载歌曲数据
+            await SongManager.fetchSongs();
+            console.log(`已加载 ${SongManager.songs.length} 首歌曲`);
+
+            // 初始化难度标签
+            initializeLevelTabs();
+
+            // 初始化选歌界面
+            await SongSelector.initialize();
+
+            // 添加操作按钮
+            addActionButtons();
         }
-
-        // 加载歌曲数据
-        await SongManager.fetchSongs();
-        console.log(`已加载 ${SongManager.songs.length} 首歌曲`);
-
-        // 初始化难度标签
-        initializeLevelTabs();
-
-        // 检查SongSelector是否已加载
-        if (typeof SongSelector === 'undefined') {
-            throw new Error('SongSelector未定义！请确保scripts/songSelector.js正确加载');
-        }
-
-        // 初始化选歌界面
-        await SongSelector.initialize();
-
-        // 添加操作按钮
-        addActionButtons();
     } catch (error) {
         console.error('初始化失败:', error);
         const songListContainer = document.getElementById('songList');
