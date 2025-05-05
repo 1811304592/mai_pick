@@ -27,8 +27,16 @@
     </div>
 </div>
 
-<script src="scripts/songManager.js"></script>
-<script src="scripts/songSelector.js"></script>
-<script src="scripts/init.js"></script>
+<!-- 确保脚本按照正确顺序加载，添加错误处理 -->
+<script>
+    function handleScriptError(error) {
+        console.error('脚本加载失败:', error);
+        document.getElementById('songList').innerHTML =
+            '<div class="error">脚本加载失败，请刷新页面或检查网络连接</div>';
+    }
+</script>
+<script src="scripts/songManager.js" onerror="handleScriptError(event)"></script>
+<script src="scripts/songSelector.js" onerror="handleScriptError(event)"></script>
+<script src="scripts/init.js" onerror="handleScriptError(event)"></script>
 </body>
 </html>

@@ -25,9 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const songListContainer = document.getElementById('songList');
         songListContainer.innerHTML = '<div class="loading">正在加载歌曲数据...</div>';
 
-        // 检查脚本是否已加载
-        if (!checkScriptsLoaded()) {
-            return;
+        // 检查SongManager是否已加载
+        if (typeof SongManager === 'undefined') {
+            throw new Error('SongManager未定义！请确保scripts/songManager.js正确加载');
         }
 
         // 加载歌曲数据
@@ -37,6 +37,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 初始化难度标签
         initializeLevelTabs();
 
+        // 检查SongSelector是否已加载
+        if (typeof SongSelector === 'undefined') {
+            throw new Error('SongSelector未定义！请确保scripts/songSelector.js正确加载');
+        }
+
         // 初始化选歌界面
         await SongSelector.initialize();
 
@@ -44,8 +49,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         addActionButtons();
     } catch (error) {
         console.error('初始化失败:', error);
-        document.getElementById('songList').innerHTML =
-            `<div class="error">加载歌曲数据失败: ${error.message}<br>请刷新页面重试</div>`;
+        const songListContainer = document.getElementById('songList');
+        if (songListContainer) {
+            songListContainer.innerHTML = `<div class="error">加载失败: ${error.message}<br>请刷新页面或检查控制台</div>`;
+        }
     }
 });
 

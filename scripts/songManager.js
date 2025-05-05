@@ -1,5 +1,5 @@
-// 确保SongManager在全局作用域中定义
-window.SongManager = {
+// 直接在全局作用域定义
+const SongManager = {
     songs: [],
 
     // 从API获取歌曲数据
@@ -73,4 +73,6 @@ window.SongManager = {
     }
 };
 
+// 明确将对象挂载到window上
+window.SongManager = SongManager;
 console.log('SongManager已加载');

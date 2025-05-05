@@ -18,8 +18,6 @@ window.SongSelector = {
 
     // 添加搜索栏
     addSearchBar() {
-        console.log('添加搜索栏...');
-
         // 检查是否已经有搜索栏
         if (document.getElementById('songSearch')) {
             return;
@@ -49,7 +47,8 @@ window.SongSelector = {
         const songListContainer = document.getElementById('songList');
         songListContainer.innerHTML = '';
 
-        if (SongManager.songs.length === 0) {
+        // 添加对SongManager的安全检查
+        if (!window.SongManager || !window.SongManager.songs || window.SongManager.songs.length === 0) {
             songListContainer.innerHTML = '<div class="no-results">没有可用的歌曲数据</div>';
             return;
         }
@@ -85,13 +84,16 @@ window.SongSelector = {
             songItem.className = `song-item ${isSelected ? 'selected' : ''}`;
             songItem.dataset.id = song.id;
 
+            // 使用歌曲ID构建封面URL
+            const coverUrl = `https://www.diving-fish.com/covers/${song.id}.png`;
+
             // 确保basic_info存在
             const artist = song.basic_info && song.basic_info.artist ? song.basic_info.artist : '未知';
             const bpm = song.basic_info && song.basic_info.bpm ? song.basic_info.bpm : '未知';
             const levels = song.level && Array.isArray(song.level) ? song.level.join(', ') : '未知';
 
             songItem.innerHTML = `
-                <img src="https://www.diving-fish.com/covers/${song.id}.png" class="song-cover" onerror="this.src='img/default_cover.png'">
+                <img src="${coverUrl}" class="song-cover" onerror="this.src='img/default_cover.png'">
                 <div class="song-details">
                     <div class="song-title">${song.title || '未知歌曲'}</div>
                     <div class="song-info">
@@ -185,4 +187,5 @@ window.SongSelector = {
     }
 };
 
+// 明确将对象挂载到window上
 console.log('SongSelector已加载');
