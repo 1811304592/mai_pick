@@ -1,12 +1,178 @@
 /* 导入基础样式 */
 @import url('index.css');
 
+
+/* 转盘区域样式 */
+.wheel-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.wheel-area h2 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.wheel-container {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    margin: 0 auto;
+}
+
+/* 转盘指针样式 */
+.wheel-pointer {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 30px;
+    height: 40px;
+    background-color: #ff4c89;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10;
+}
+
+/* 结果显示区域 */
+.result-display {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    text-align: center;
+    min-height: 60px;
+}
+
+/* 抽取结果样式 */
+.selected-song {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.selected-song h3 {
+    color: #ff4c89;
+    margin-bottom: 15px;
+}
+
+.song-details {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    width: 100%;
+}
+
+.result-cover {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.song-info {
+    text-align: left;
+    flex-grow: 1;
+}
+
+.song-info h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.song-info p {
+    margin: 5px 0;
+    color: #666;
+}
+
+/* 转盘控制按钮 */
+.wheel-controls {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.spin-button {
+    background-color: #ff4c89;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.spin-button:hover {
+    background-color: #e6447c;
+    transform: translateY(-2px);
+}
+
+.spin-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.return-button {
+    background-color: #666;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px 30px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.return-button:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+}
+
+/* 无歌曲或错误消息 */
+.no-songs-message,
+.error-message {
+    text-align: center;
+    padding: 30px;
+    margin: 20px 0;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+/* 响应式样式 */
+@media (max-width: 600px) {
+    .wheel-container {
+        width: 300px;
+        height: 300px;
+    }
+
+    #wheel {
+        width: 300px;
+        height: 300px;
+    }
+
+    .wheel-controls {
+        flex-direction: column;
+    }
+}
+
+
 /* 转盘容器样式 */
 .wheel-container {
     position: relative;
     width: 500px;
     height: 500px;
-    margin: 40px auto;
+    margin: 0 auto;
 }
 
 /* 转盘样式 */
@@ -81,14 +247,14 @@
 /* 转盘指针 */
 .wheel-pointer {
     position: absolute;
-    top: -5px;
+    top: -5px; /* 略微上移 */
     left: 50%;
     width: 30px;
-    height: 50px;
-    background-color: #ff9800;
-    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    height: 40px;
+    background-color: #ff4c89;
     transform: translateX(-50%);
-    z-index: 15;
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    z-index: 10;
 }
 
 /* 返回按钮样式 */
@@ -221,9 +387,20 @@ body {
 
 
 #wheel {
-    width: 300px;
-    height: 300px;
     position: relative;
-    transform-origin: center center; /* 确保旋转中心在元素中心 */
+    display: block;
     margin: 0 auto;
+}
+
+/* 响应式布局调整 */
+@media (max-width: 600px) {
+    .wheel-container {
+        width: 300px;
+        height: 300px;
+    }
+
+    #wheel {
+        width: 300px;
+        height: 300px;
+    }
 }
