@@ -1,11 +1,11 @@
 const WheelManager = {
     selectedSong: null,
     isSpinning: false,
-    filteredSongs: [],
-    currentLevel: 'all',
+    wheelSongs: [],
     leftOffset: -90,
 
     createSector(index, total, song) {
+        // 保持原来的扇形创建逻辑不变
         const angle = 360 / total;
         const startAngle = index * angle;
         const endAngle = startAngle + angle;
@@ -73,32 +73,33 @@ const WheelManager = {
         const wheel = document.getElementById('wheel');
         wheel.innerHTML = '';
         wheel.style.transform = 'rotate(0deg)';
-
-        // 添加关键属性：设置旋转中心点
         wheel.style.transformOrigin = 'center center';
 
         // 显示加载中提示
         wheel.innerHTML = '<div class="wheel-empty">加载歌曲中...</div>';
 
-        // 确保歌曲数据已加载
-        if (SongManager.songs.length === 0) {
-            return SongManager.fetchSongs().then(() => {
-                this.completeInitialization(wheel);
-            });
-        }
-
-        this.completeInitialization(wheel);
-    },
-
-    completeInitialization(wheel) {
-        // 获取当前等级的歌曲
-        this.filteredSongs = SongManager.getSongsByLevel(this.currentLevel);
-
-        if (this.filteredSongs.length === 0) {
-            wheel.innerHTML = '<div class="wheel-empty">没有找到歌曲</div>';
+        // 从本地存储加载已选择的歌曲
+        const selectedSongs = localStorage.getItem('selectedSongs');
+        if (!selectedSongs) {
+            wheel.innerHTML = '<div class="wheel-empty">请先在主页面选择歌曲</div>';
             return;
         }
 
+        this.wheelSongs = JSON.parse(selectedSongs);
+
+        if (this.wheelSongs.length === 0) {
+            wheel.innerHTML = '<div class="wheel-empty">请先在主页面选择歌曲</div>';
+            return;
+        }
+
+        // 显示歌曲数量信息
+        document.getElementById('selectedInfo').textContent = `已选择 ${this.wheelSongs.length} 首歌曲`;
+
+        // 创建转盘
+        this.createWheel(wheel);
+    },
+
+    createWheel(wheel) {
         // 清空wheel并创建SVG元素
         wheel.innerHTML = '';
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -108,14 +109,14 @@ const WheelManager = {
         wheel.appendChild(svg);
 
         // 添加扇形
-        this.filteredSongs.forEach((song, index) => {
-            const sector = this.createSector(index, this.filteredSongs.length, song);
+        this.wheelSongs.forEach((song, index) => {
+            const sector = this.createSector(index, this.wheelSongs.length, song);
             svg.appendChild(sector);
         });
     },
 
     spin() {
-        if (this.isSpinning || this.filteredSongs.length === 0) return;
+        if (this.isSpinning || this.wheelSongs.length === 0) return;
         this.isSpinning = true;
 
         // 清除之前的结果
@@ -126,11 +127,11 @@ const WheelManager = {
         wheel.style.transformOrigin = 'center center';
 
         // 随机选择一首歌
-        const randomIndex = Math.floor(Math.random() * this.filteredSongs.length);
-        this.selectedSong = this.filteredSongs[randomIndex];
+        const randomIndex = Math.floor(Math.random() * this.wheelSongs.length);
+        this.selectedSong = this.wheelSongs[randomIndex];
 
-        // 计算旋转角度 - 修改这部分确保指向扇形中心
-        const angle = 360 / this.filteredSongs.length;
+        // 计算旋转角度 - 指向扇形中心
+        const angle = 360 / this.wheelSongs.length;
         const midAngle = angle * randomIndex + angle / 2; // 扇形的中心角度
         const extraRotations = 5; // 额外旋转5圈
         const targetAngle = -(midAngle + 360 * extraRotations);
@@ -146,17 +147,31 @@ const WheelManager = {
         }, 4000);
     },
 
-    // 切换难度等级
-    switchLevel(level) {
+    showResult() {
+        const resultContainer = document.getElementById('resultSong');
+
+        // 获取歌曲的所有难度等级
+        const levelText = this.selectedSong.level.join(', ');
+
+        resultContainer.innerHTML = `
+            <div class="song-info">
+                <div class="song-title">${this.selectedSong.title}</div>
+                <div class="song-artist">${this.selectedSong.basic_info.artist}</div>
+                <div class="song-level">难度: ${levelText}</div>
+                <div class="song-bpm">BPM: ${this.selectedSong.basic_info.bpm}</div>
+                <div class="song-genre">类型: ${this.selectedSong.basic_info.genre}</div>
+            </div>
+        `;
+    },
+
+    reset() {
         if (this.isSpinning) return;
 
-        this.currentLevel = level;
-        this.initialize();
+        const wheel = document.getElementById('wheel');
+        wheel.style.transition = 'none';
+        wheel.style.transform = 'rotate(0deg)';
 
-        // 更新标签激活状态
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.querySelector(`.tab[data-level="${level}"]`).classList.add('active');
+        document.getElementById('resultSong').innerHTML = '';
+        this.selectedSong = null;
     }
 };

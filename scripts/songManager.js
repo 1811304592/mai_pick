@@ -4,47 +4,44 @@ const SongManager = {
     // 从API获取歌曲数据
     async fetchSongs() {
         try {
-            // 先检查本地存储中是否有缓存的歌曲数据
-            const cachedData = localStorage.getItem('songData');
-            const cachedTime = localStorage.getItem('songDataTimestamp');
+            // 检查本地缓存是否有效
+            const cachedData = localStorage.getItem('songsData');
+            const cachedTime = localStorage.getItem('songsDataTime');
 
-            // 如果有缓存数据且不超过24小时，直接使用缓存
-            if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime) < 24 * 60 * 60 * 1000)) {
+            // 如果缓存存在且未过期（24小时内）
+            if (cachedData && cachedTime && (Date.now() - parseInt(cachedTime)) < 24 * 60 * 60 * 1000) {
                 this.songs = JSON.parse(cachedData);
                 console.log('使用缓存的歌曲数据');
                 return this.songs;
             }
 
-            // 否则从API获取最新数据
-            console.log('正在从API获取歌曲数据...');
+            // 从API获取数据
             const response = await fetch('https://www.diving-fish.com/api/maimaidxprober/music_data');
-
             if (!response.ok) {
-                throw new Error('无法获取歌曲数据，HTTP状态码: ' + response.status);
+                throw new Error('获取歌曲数据失败');
             }
 
-            const data = await response.json();
-            this.songs = data;
+            this.songs = await response.json();
 
-            // 缓存数据到本地存储
-            localStorage.setItem('songData', JSON.stringify(data));
-            localStorage.setItem('songDataTimestamp', Date.now().toString());
+            // 保存到本地缓存
+            localStorage.setItem('songsData', JSON.stringify(this.songs));
+            localStorage.setItem('songsDataTime', Date.now().toString());
 
-            console.log(`成功获取 ${data.length} 首歌曲数据`);
-            return data;
+            console.log('已获取新歌曲数据');
+            return this.songs;
         } catch (error) {
             console.error('获取歌曲数据出错:', error);
 
-            // 如果API请求失败，尝试使用缓存数据（即使已过期）
-            const cachedData = localStorage.getItem('songData');
+            // 如果有缓存数据，在出错时使用缓存
+            const cachedData = localStorage.getItem('songsData');
             if (cachedData) {
-                console.log('使用过期的缓存数据');
                 this.songs = JSON.parse(cachedData);
+                console.log('使用缓存的歌曲数据（API获取失败）');
                 return this.songs;
             }
 
-            // 如果没有缓存，返回空数组
-            return [];
+            // 如果没有缓存，抛出错误
+            throw error;
         }
     },
 

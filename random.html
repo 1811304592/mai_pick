@@ -3,39 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>随机选歌 - 舞萌DX比赛工具</title>
+    <title>随机抽取歌曲</title>
     <link rel="stylesheet" href="css/random.css">
-    <link rel="icon" type="image/png" href="./img/logo.png">
 </head>
-
-<script src="scripts/songManager.js"></script>
-<script src="scripts/wheelManager.js"></script>
-<script src="scripts/init.js"></script>
-
 <body>
+<a href="index.html" class="back-link">返回选歌</a>
 
-    <a href="index.html" class="back-link">返回比赛</a>
-    <a href="settings.html" class="settings-link">设置</a>
-
-    <div class="tabs" id="levelTabs">
-        <div class="tab active" data-level="all">全部歌曲</div>
-    </div>
+<div class="container">
+    <h1>随机抽取歌曲</h1>
 
     <div class="wheel-container">
-        <div class="wheel" id="wheel">
-            <!-- 转盘将由JS动态生成 -->
-        </div>
-        <div class="wheel-center" id="spinButton">
-            <span>随机</span>
+        <!-- 已选歌曲信息将在这里显示 -->
+        <div id="wheel" class="wheel">
+            <!-- 转盘将通过JavaScript生成 -->
         </div>
         <div class="wheel-pointer"></div>
     </div>
 
-    <div class="result-container" id="resultContainer">
-        <h2>随机结果</h2>
-        <div id="resultSong" class="result-song">
-            <!-- 随机结果将在这里显示 -->
-        </div>
+    <button id="spinButton" class="btn primary-btn">开始转动</button>
+
+    <div id="resultSong" class="song-result">
+        <!-- 抽取结果将在这里显示 -->
     </div>
+</div>
+
+<script src="scripts/songManager.js"></script>
+<script src="scripts/wheelManager.js"></script>
+<script src="scripts/init.js"></script>
 </body>
 </html>

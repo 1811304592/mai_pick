@@ -1,0 +1,115 @@
+.status-bar {
+    background-color: #f0f0f0;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}d;
+margin-bottom: 5px;
+}
+
+.song-details {
+    flex: 1;
+}
+
+.song-info {
+    font-size: 12px;
+    color: #666;
+}
+
+.search-container {
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+#songSearch {
+    padding: 8px 15px;
+    border
+
+    .song-item {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .song-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .song-item.selected {
+        background-color: #e3f2fd;
+        border-left: 4px solid #2196f3;
+    }
+
+    .song-cover {
+        width: 60px;
+        height: 60px;
+        margin-right: 15px;
+        border-radius: 5px;
+    }
+
+    .song-title {
+        font-weight: bol-radius: 20px;
+        border: 1px solid #ddd;
+        width: 60%;
+        font-size: 16px;
+    }
+
+    .search-info {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+    }
+
+    .action-button {
+        padding: 10px 20px;
+        border-radius: 20px;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    #saveSelection {
+        background-color: #4caf50;
+        color: white;
+    }
+
+    #saveSelection:hover {
+        background-color: #388e3c;
+    }
+
+    #randomButton {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    #randomButton:hover:not(:disabled) {
+        background-color: #f57c00;
+    }
+
+    #randomButton:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+    }
+
+    .loading, .no-results {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+    }
