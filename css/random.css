@@ -218,3 +218,12 @@ body {
     margin: 0;
     padding: 0;
 }
+
+
+#wheel {
+    width: 300px;
+    height: 300px;
+    position: relative;
+    transform-origin: center center; /* 确保旋转中心在元素中心 */
+    margin: 0 auto;
+}

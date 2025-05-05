@@ -69,19 +69,28 @@ const WheelManager = {
         return group;
     },
 
-    async initialize() {
+    initialize() {
         const wheel = document.getElementById('wheel');
         wheel.innerHTML = '';
         wheel.style.transform = 'rotate(0deg)';
+
+        // 添加关键属性：设置旋转中心点
+        wheel.style.transformOrigin = 'center center';
 
         // 显示加载中提示
         wheel.innerHTML = '<div class="wheel-empty">加载歌曲中...</div>';
 
         // 确保歌曲数据已加载
         if (SongManager.songs.length === 0) {
-            await SongManager.fetchSongs();
+            return SongManager.fetchSongs().then(() => {
+                this.completeInitialization(wheel);
+            });
         }
 
+        this.completeInitialization(wheel);
+    },
+
+    completeInitialization(wheel) {
         // 获取当前等级的歌曲
         this.filteredSongs = SongManager.getSongsByLevel(this.currentLevel);
 
@@ -93,8 +102,8 @@ const WheelManager = {
         // 清空wheel并创建SVG元素
         wheel.innerHTML = '';
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "300");
-        svg.setAttribute("height", "300");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
         svg.setAttribute("viewBox", "0 0 300 300");
         wheel.appendChild(svg);
 
@@ -113,15 +122,18 @@ const WheelManager = {
         document.getElementById('resultSong').innerHTML = '';
         const wheel = document.getElementById('wheel');
 
+        // 确保旋转中心设置正确
+        wheel.style.transformOrigin = 'center center';
+
         // 随机选择一首歌
         const randomIndex = Math.floor(Math.random() * this.filteredSongs.length);
         this.selectedSong = this.filteredSongs[randomIndex];
 
-        // 计算旋转角度
-        // 目标角度 = 选中歌曲的位置角度 + 额外旋转圈数
-        const baseAngle = (360 / this.filteredSongs.length) * randomIndex;
+        // 计算旋转角度 - 修改这部分确保指向扇形中心
+        const angle = 360 / this.filteredSongs.length;
+        const midAngle = angle * randomIndex + angle / 2; // 扇形的中心角度
         const extraRotations = 5; // 额外旋转5圈
-        const targetAngle = -(baseAngle + 360 * extraRotations);
+        const targetAngle = -(midAngle + 360 * extraRotations);
 
         // 设置动画
         wheel.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.3, 1)';
@@ -132,34 +144,6 @@ const WheelManager = {
             this.isSpinning = false;
             this.showResult();
         }, 4000);
-    },
-
-    showResult() {
-        const resultContainer = document.getElementById('resultSong');
-
-        // 获取歌曲的所有难度等级
-        const levelText = this.selectedSong.level.join(', ');
-
-        resultContainer.innerHTML = `
-            <div class="song-info">
-                <div class="song-title">${this.selectedSong.title}</div>
-                <div class="song-artist">${this.selectedSong.basic_info.artist}</div>
-                <div class="song-level">难度: ${levelText}</div>
-                <div class="song-bpm">BPM: ${this.selectedSong.basic_info.bpm}</div>
-                <div class="song-genre">类型: ${this.selectedSong.basic_info.genre}</div>
-            </div>
-        `;
-    },
-
-    reset() {
-        if (this.isSpinning) return;
-
-        const wheel = document.getElementById('wheel');
-        wheel.style.transition = 'none';
-        wheel.style.transform = 'rotate(0deg)';
-
-        document.getElementById('resultSong').innerHTML = '';
-        this.selectedSong = null;
     },
 
     // 切换难度等级
