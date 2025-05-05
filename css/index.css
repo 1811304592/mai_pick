@@ -1,21 +1,16 @@
 /* 状态栏样式 */
 .status-bar {
-    position: fixed;
+    background-color: #ff4c89; /* 使用主题色作为背景 */
+    color: white; /* 白色文字在粉色背景上有很好的对比度 */
+    padding: 12px 15px;
+    position: sticky; /* 使用sticky而不是fixed */
     top: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    color: #ffffff;
-    padding: 0;
-    text-align: center;
-    font-size: 1.2em;
-    font-weight: 500;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 100%;
+    box-sizing: border-box;
     z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+    font-weight: 500;
 }
 
 .status-bar.ban-phase { 
@@ -38,22 +33,22 @@ body {
 
 /* 调整设置按钮位置以适应新的状态栏 */
 /* 调整设置按钮位置 */
-.settings-link {
-    position: fixed;
-    top: 50px;  /* 改为50px，让按钮在状态栏下方 */
-    right: 20px;
-    padding: 10px 20px;
-    background-color: #48B8CA;
-    color: white;
+.settings-link{
+    position: absolute;
+    top: 10px;
+    padding: 6px 12px;
+    background-color: white;
+    color: #ff4c89;
+    border-radius: 4px;
     text-decoration: none;
-    border-radius: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s;
 }
 
-.settings-link:hover {
-    background-color: #48B8CA;
-    transform: translateY(-2px);
+.settings-link:hover{
+    background-color: #f8f8f8;
+    transform: translateY(-1px);
 }
 
 /* 撤销按钮样式 */
@@ -210,19 +205,54 @@ body {
     }
 /* 随机选歌按钮样式 */
 .random-link {
-    position: fixed;
-    top: 50px;
-    right: 150px;
-    padding: 10px 20px;
-    background-color: #9c27b0;
-    color: white;
+    position: absolute;
+    top: 10px;
+    padding: 6px 12px;
+    background-color: white;
+    color: #ff4c89;
+    border-radius: 4px;
     text-decoration: none;
-    border-radius: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s;
 }
 
 .random-link:hover {
-    background-color: #7b1fa2;
-    transform: translateY(-2px);
+    background-color: #f8f8f8;
+    transform: translateY(-1px);
+}
+
+.container {
+    margin-top: 20px; /* 增加顶部间距 */
+    padding-bottom: 20px; /* 增加底部间距以适应分页控件 */
+}
+
+.settings-link {
+    right: 120px;
+}
+
+.random-link {
+    right: 20px;
+}
+
+
+
+/* 响应式样式 */
+@media (max-width: 600px) {
+    .status-bar {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .settings-link, .random-link {
+        position: relative;
+        display: inline-block;
+        margin: 10px 5px;
+        top: auto;
+        right: auto;
+    }
+
+    .container {
+        margin-top: 10px;
+    }
 }

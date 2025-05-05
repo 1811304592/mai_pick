@@ -122,3 +122,106 @@
     text-align: center;
     margin: 20px 0;
 }
+
+
+/* 分页控件样式 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+}
+
+.pagination-info {
+    margin-right: 10px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.pagination-btn {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+}
+
+.pagination-btn.active {
+    background-color: #ff4c89;
+    color: white;
+    border-color: #ff4c89;
+}
+
+.pagination-btn:disabled {
+    color: #aaa;
+    cursor: not-allowed;
+    background-color: #f5f5f5;
+}
+
+/* 为图片加载状态添加样式 */
+.song-cover {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: opacity 0.3s;
+}
+
+.song-cover[data-src] {
+    opacity: 0.7;
+}
+
+.level-selector-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    padding: 5px;
+}
+
+.level-selector-wrapper label {
+    margin-right: 10px;
+    font-weight: 500;
+    color: #333;
+}
+
+.level-selector {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #333;
+    font-size: 16px;
+    min-width: 180px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.level-selector:hover {
+    border-color: #ff4c89;
+}
+
+.level-selector:focus {
+    border-color: #ff4c89;
+    box-shadow: 0 0 0 2px rgba(255, 76, 137, 0.2);
+}
+
+/* 响应式样式 */
+@media (max-width: 600px) {
+    .level-selector {
+        min-width: 120px;
+        font-size: 14px;
+    }
+}
